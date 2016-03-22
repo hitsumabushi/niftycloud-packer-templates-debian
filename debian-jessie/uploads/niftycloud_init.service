@@ -1,0 +1,17 @@
+[Unit]
+Description=Nifty Cloud Initialization script
+After=vmtoolsd.service
+After=niftycloud_update.service
+After=network.target
+Requires=vmtoolsd.service
+Requires=niftycloud_update.service
+Requires=network.target
+Before=sshd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/niftycloud_init
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

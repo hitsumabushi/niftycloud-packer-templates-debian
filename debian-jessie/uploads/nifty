@@ -1,0 +1,25 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          nifty
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:
+# Default-Start:     S
+# Default-Stop:
+### END INIT INFO
+
+case "$1" in
+   *start)
+        ;;
+   *)
+        echo $"Usage: $0 {start}"
+        exit 1
+        ;;
+esac
+
+GW=$(/bin/netstat -rn | /bin/grep "^0.0.0.0 " | /usr/bin/awk '{print $2}')
+[ -n "${GW}" ] && /bin/ping -c 1 ${GW} 2>&1 > /dev/null
+
+ROUTE=$(/sbin/ip route show)
+[ -n "${ROUTE}" -a -f /etc/init.d/nifty-change_cron ] && /etc/init.d/nifty-change_cron
+
+exit 0

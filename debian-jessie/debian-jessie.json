@@ -1,0 +1,133 @@
+{
+  "variables": {
+    "use_vmware_tools": "",
+    "core": "1",
+    "memory": "512",
+    "disk_size": "40000",
+    "ssh_username": "root",
+    "ssh_password": "vagrant",
+    "ssh_port": "22",
+    "ssh_wait_timeout": "1800s",
+    "iso_url": "http://cdimage.debian.org/debian-cd/8.3.0/amd64/iso-cd/debian-8.3.0-amd64-netinst.iso",
+    "iso_md5": "a9b490b4215d1e72e876b031dafa7184",
+    "output_directory": "outputs",
+    "vm_name": "debian-jessie-{{isotime \"20060102T150405\"}}",
+    "domain_name": "localdomain",
+    "version": "8"
+  },
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "uploads",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/base.sh",
+        "scripts/vmware_tools.sh",
+        "scripts/network.sh",
+        "scripts/niftycloud.sh"
+      ],
+      "environment_vars": [ "USE_VMWARE_TOOLS={{user `use_vmware_tools`}}" ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/cleanup.sh",
+        "scripts/zerodisk.sh"
+      ]
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg <wait>",
+        "debian-installer=en_US <wait>",
+        "auto=true <wait>",
+        "locale=en_US <wait>",
+        "console-setup/charmap=UTF-8 <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "kbd-chooser/method=us <wait>",
+        "keyboard-configuration/xkb-keymap=us <wait>",
+        "pkgsel/language-pack-patterns=pkgsel/install-language-support=false <wait>",
+        "netcfg/get_hostname={{.Name}} <wait>",
+        "netcfg/get_domain={{user `domain_name`}} <wait>",
+        "interface=auto <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "<enter><wait>"
+      ],
+      "disk_size": "{{user `disk_size`}}",
+      "guest_os_type": "Debian_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_md5`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "shutdown_command": "date > /build && shutdown -h now",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_port": "{{user `ssh_port`}}",
+      "ssh_wait_timeout": "{{user `ssh_wait_timeout`}}",
+      "vm_name": "{{user `vm_name`}}",
+      "output_directory": "{{user `output_directory`}}"
+    },
+    {
+      "type": "vmware-iso",
+      "vmx_data": {
+        "numvcpus": "{{user `core`}}",
+        "cpuid.coresPerSocket": "1",
+        "memsize": "{{user `memory`}}",
+        "virtualhw.version": "{{user `version`}}",
+        "ethernet0.present": "TRUE",
+        "ethernet0.startConnected": "TRUE",
+        "ethernet0.virtualDev": "vmxnet3",
+        "ethernet1.present": "TRUE",
+        "ethernet1.startConnected": "TRUE",
+        "ethernet1.virtualDev": "vmxnet3"
+      },
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg <wait>",
+        "debian-installer=en_US <wait>",
+        "auto=true <wait>",
+        "locale=en_US <wait>",
+        "console-setup/charmap=UTF-8 <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "kbd-chooser/method=us <wait>",
+        "keyboard-configuration/xkb-keymap=us <wait>",
+        "pkgsel/language-pack-patterns=pkgsel/install-language-support=false <wait>",
+        "netcfg/get_hostname={{.Name}} <wait>",
+        "netcfg/get_domain={{user `domain_name`}} <wait>",
+        "interface=auto <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "<enter><wait>"
+      ],
+      "disk_size": "{{user `disk_size`}}",
+      "guest_os_type": "debian7-64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_md5`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "shutdown_command": "date > /build && shutdown -h now",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_port": "{{user `ssh_port`}}",
+      "ssh_wait_timeout": "{{user `ssh_wait_timeout`}}",
+      "tools_upload_flavor": "linux",
+      "tools_upload_path": "/tmp/{{.Flavor}}.iso",
+      "version": "{{user `version`}}",
+      "vm_name": "{{user `vm_name`}}",
+      "output_directory": "{{user `output_directory`}}"
+    }
+  ],
+  "post-processors": [
+  ]
+}
